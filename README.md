@@ -17,20 +17,16 @@ The latest release of [apnds](https://github.com/ljtpetersen/apnds), extracted t
 
 To make the `.apworld` file, run `make` within the root directory of the repository.
 
-## DeSmuME Connector (experimental)
+## melonDS Connector (experimental)
 
-`connector_desmume_generic.lua` lets macOS users connect through DeSmuME instead of BizHawk.
-It implements the same TCP/JSON protocol as Archipelago's `connector_bizhawk_generic.lua`, so the
-existing BizHawk Client works unchanged. See the DeSmuME section of the
+`connector_melonds_generic.lua` lets macOS users connect through melonDS instead of BizHawk.
+It speaks the same TCP/JSON protocol as Archipelago's `connector_bizhawk_generic.lua`, so the
+existing BizHawk Client works unchanged. See the melonDS section of the
 [setup guide](docs/setup_en.md) for usage.
 
-**Warning:** this requires a DeSmuME build with the experimental macOS Lua support enabled *and* its
-Lua symbols exported, which is **not** in the stock release. Use
-[DarthMDev/desmume](https://github.com/DarthMDev/desmume/tree/cocoa-lua-export-symbols) (it patches `lua/luaconf.h` to export the
-Lua API), and note you must build the **debug/dev build** yourself; you need to know how to compile
-DeSmuME on macOS (Xcode). It also needs a LuaSocket built for Lua 5.1, staged in `~/.desmume-ap-lua`;
-run [`tools/desmume_luasocket_setup.sh`](tools/desmume_luasocket_setup.sh) to build and stage it. See
-the [setup guide](docs/setup_en.md) for the full procedure.
+This path uses [NPO-197/melonDS-lua](https://github.com/NPO-197/melonDS-lua) and a standard
+LuaSocket install for Lua 5.4. Run [`tools/melonds_luasocket_setup.sh`](tools/melonds_luasocket_setup.sh)
+if you want to stage LuaSocket in `~/.melonds-ap-lua`.
 
 ## Where Help is Needed
 

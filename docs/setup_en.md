@@ -59,51 +59,41 @@ in case you have to close and reopen a window mid-game for some reason.
 You should now be able to send checked locations and receive items. You'll need to do these steps every time you want to reconnect. It is
 perfectly safe to make progress offline; everything will re-sync when you reconnect.
 
-## Playing with DeSmuME (macOS alternative - experimental)
+## Playing with melonDS (macOS alternative - experimental)
 
-BizHawk is the recommended and best-supported emulator. If you can't use BizHawk (for example on
-an Apple Silicon Mac), you can instead connect through DeSmuME using `connector_desmume_generic.lua`
-from this repository, which speaks the same protocol as BizHawk's connector so Archipelago's
-BizHawk Client can talk to it unchanged.
+BizHawk is the recommended and best-supported emulator. If you want a macOS alternative, you can
+connect through melonDS using `connector_melonds_generic.lua` from this repository, which speaks
+the same protocol as BizHawk's connector so Archipelago's BizHawk Client can talk to it unchanged.
 
-The setup below is written for macOS (the DeSmuME Cocoa frontend). The connector itself is not
-OS-specific, but the build patch and the LuaSocket helper script target the macOS build.
+The setup below is written for macOS and assumes the [NPO-197/melonDS-lua](https://github.com/NPO-197/melonDS-lua)
+branch.
 
-This path is experimental and has two one-time requirements. Both exist because DeSmuME embeds
-**Lua 5.1** with no networking, and everything must run through a **single** Lua instance (mixing two
-copies of Lua 5.1 in one process crashes on teardown).
+This path is experimental and has two one-time requirements:
 
-- **A DeSmuME build with Lua enabled *and* its Lua symbols exported.** The stock macOS release
-  generally ships without Lua at all, and even Lua-enabled builds hide the Lua C API
-  (`-fvisibility=hidden`), which prevents an external LuaSocket from binding to DeSmuME's Lua. Use
-  [DarthMDev/desmume](https://github.com/DarthMDev/desmume/tree/cocoa-lua-export-symbols), which patches `lua/luaconf.h` to export
-  the Lua API. You must build the **debug/dev build** yourself and be comfortable compiling DeSmuME on
-  macOS (Xcode); there is no ready-made binary.
+- **A melonDS-lua build.** Follow the [BUILD.MD](https://github.com/NPO-197/melonDS-lua/blob/master/BUILD.MD)
+  instructions for macOS. In practice that means installing the Homebrew deps listed there, cloning
+  melonDS-lua, and building it with CMake.
 
-- **LuaSocket built for Lua 5.1**, staged where the connector looks for it (`~/.desmume-ap-lua`). Run
-  the helper script from this repo, which builds a private Lua 5.1 + LuaSocket (via `hererocks`, so
-  you don't need a system Lua 5.1) and stages it:
+- **LuaSocket for Lua 5.4**, staged where the connector looks for it (`~/.melonds-ap-lua`). Run the
+  helper script from this repo, which installs LuaSocket with `luarocks` and stages it:
   ```
-  ./tools/desmume_luasocket_setup.sh
+  ./tools/melonds_luasocket_setup.sh
   ```
-  This produces `~/.desmume-ap-lua/socket.lua` and `~/.desmume-ap-lua/socket/core.so`. (Set
-  `DESMUME_LUASOCKET_DIR` to stage it elsewhere.)
+  This produces `~/.melonds-ap-lua/share/lua/5.4/socket.lua` and
+  `~/.melonds-ap-lua/lib/lua/5.4/socket/core.so`. (Set `MELONDS_LUASOCKET_DIR` to stage it elsewhere.)
 
 Once those are in place:
 
 1. Patch your ROM and open the BizHawk Client from the Archipelago Launcher as described above.
-2. Load your patched `.nds` in DeSmuME and let it run past the title screen.
-3. Open DeSmuME's Lua Script Console (`Tools > New Lua Script Window`), browse to
-   `connector_desmume_generic.lua`, and run it.
-4. The BizHawk Client will connect to DeSmuME automatically and recognize Pokémon HeartGold and
+2. Load your patched `.nds` in melonDS and let it run past the title screen.
+3. Open melonDS's Lua Script window, browse to `connector_melonds_generic.lua`, and run it.
+4. The BizHawk Client will connect to melonDS automatically and recognize Pokémon HeartGold and
    SoulSilver. Connect to your room's address as in step 7 above.
 
 ## Common Issues
 
 1. **Problem**: "No handler was found for this game." in the client. **Solution**: Update to at least BizHawk version 2.10.
-2. **Problem (DeSmuME)**: the connector prints `module 'socket' not found`. **Solution**: run
-   `./tools/desmume_luasocket_setup.sh` so `~/.desmume-ap-lua/socket/core.so` exists.
-3. **Problem (DeSmuME)**: `require("socket")` fails even though `~/.desmume-ap-lua` exists, or DeSmuME
-   crashes when you stop the script. **Solution**: your DeSmuME build isn't exporting its Lua symbols.
-   Build the [DarthMDev/desmume](https://github.com/DarthMDev/desmume/tree/cocoa-lua-export-symbols) fork (which exports them);
-   a stock/Lua-hidden build cannot load an external LuaSocket safely.
+2. **Problem (melonDS)**: the connector prints `module 'socket' not found`. **Solution**: run
+   `./tools/melonds_luasocket_setup.sh` so the LuaSocket files exist under `~/.melonds-ap-lua`.
+3. **Problem (melonDS)**: `require("socket")` fails even though `~/.melonds-ap-lua` exists. **Solution**:
+   make sure melonDS-lua is built against the same Lua 5.4 toolchain that installed LuaSocket.
